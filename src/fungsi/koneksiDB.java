@@ -1334,4 +1334,24 @@ public class koneksiDB {
         }
         return var;
     }
+    
+    public static String WABLASAPI(){
+        try{
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var=(prop.getProperty("WABLASAPI"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
+    
+    public static String WABLASURL(){
+        try{
+            prop.loadFromXML(new FileInputStream("setting/database.xml"));
+            var=(prop.getProperty("WABLASURL"));
+        }catch(Exception e){
+            var=""; 
+        }
+        return var;
+    }
 }

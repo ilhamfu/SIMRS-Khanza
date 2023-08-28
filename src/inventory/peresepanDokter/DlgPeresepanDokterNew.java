@@ -9,8 +9,9 @@
   karena telah berdoa buruk, semua ini kami lakukan karena kami ti
   dak pernah rela karya kami dibajak tanpa ijin.
  */
-package inventory;
+package inventory.peresepanDokter;
 
+import document_filter.SimpleDocumentListener;
 import fungsi.HUtil;
 import fungsi.WarnaTable2;
 import fungsi.batasInput;
@@ -18,6 +19,12 @@ import fungsi.koneksiDB;
 import fungsi.sekuel;
 import fungsi.validasi;
 import fungsi.akses;
+import inventory.DlgBarang;
+import inventory.DlgCariAturanPakai;
+import inventory.DlgCariKonversi;
+import inventory.DlgCariMetodeRacik;
+import inventory.DlgCekStok;
+import inventory.DlgDetailRacikanDokter;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -37,7 +44,6 @@ import javax.swing.JTable;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import kepegawaian.DlgCariDokter;
 import widget.Button;
 
@@ -45,7 +51,7 @@ import widget.Button;
  *
  * @author dosen
  */
-public final class DlgPeresepanDokter extends javax.swing.JDialog {
+public final class DlgPeresepanDokterNew extends javax.swing.JDialog {
 
     private final DefaultTableModel tabModeResep, tabModeDetailResepRacikan, tabModeResepRacikan;
     private sekuel Sequel = new sekuel();
@@ -71,12 +77,17 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
      * @param modal
      */
 
+    private final DlgDetailRacikanDokter dlgDetailRacikanDokter = new DlgDetailRacikanDokter(null, false);
 
-    public DlgPeresepanDokter(java.awt.Frame parent, boolean modal) {
+    public DlgPeresepanDokterNew(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         this.setLocation(10, 2);
         setSize(656, 250);
+        dlgDetailRacikanDokter.setVisible(true);
+        
+        // BEGIN - [[[ INISIALISASI TABLE MODE RESEP ]]]
+        
         tabModeResep = new DefaultTableModel(null, new Object[]{
             "K", "Jumlah", "Kode Barang", "Nama Barang", "Satuan", "Komposisi",
             "Harga(Rp)", "Jenis Obat", "Aturan Pakai", "I.F.", "H.Beli", "Stok"
@@ -126,7 +137,10 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
         });
 
         tbResep.setDefaultRenderer(Object.class, new WarnaTable2(1));
-
+        
+        // END - [[[ INISIALISASI TABLE MODE RESEP ]]]
+       
+        /// BEGIN - [[[ INISIALISASI TABEL RESEP RACIKAN ]]]
         tabModeResepRacikan = new DefaultTableModel(null, new Object[]{
             "No", "Nama Racikan", "Kode Racik", "Metode Racik", "Jml.Racik",
             "Aturan Pakai", "Keterangan"
@@ -168,7 +182,11 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
         });
 
         tbObatResepRacikan.setDefaultRenderer(Object.class, new WarnaTable2(4));
+        
+        /// END - [[[ INISIALISASI TABEL RESEP RACIKAN ]]]
 
+        /// BEGIN - [[[ INISIALISASI TABEL DETAIL RESEP RACIKAN ]]]
+        
         tabModeDetailResepRacikan = new DefaultTableModel(null, new Object[]{
             "No", "Kode Barang", "Nama Barang", "Satuan", "Harga(Rp)", "H.Beli",
             "Jenis Obat", "Stok", "Kps", "P1", "/", "P2", "Kandungan", "Jml", "I.F.",
@@ -228,25 +246,13 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
 
         tbDetailResepObatRacikan.setDefaultRenderer(Object.class, new WarnaTable2(9));
 
+        /// END - [[[ INISIALISASI TABEL DETAIL RESEP RACIKAN ]]]
+        
         TCari.setDocument(new batasInput((byte) 100).getKata(TCari));
         if (koneksiDB.CARICEPAT().equals("aktif")) {
-            TCari.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            TCari.getDocument().addDocumentListener(new SimpleDocumentListener() {
                 @Override
-                public void insertUpdate(DocumentEvent e) {
-                    if (TCari.getText().length() > 2) {
-                        tampilobat();
-                    }
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    if (TCari.getText().length() > 2) {
-                        tampilobat();
-                    }
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
+                public void onChange(DocumentEvent e) {
                     if (TCari.getText().length() > 2) {
                         tampilobat();
                     }
@@ -292,7 +298,6 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-
         dokter.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
@@ -327,7 +332,6 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-
         metoderacik.addWindowListener(new WindowListener() {
             @Override
             public void windowOpened(WindowEvent e) {
@@ -362,7 +366,6 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
             public void windowDeactivated(WindowEvent e) {
             }
         });
-
         metoderacik.getTable().addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -379,6 +382,7 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
             public void keyReleased(KeyEvent e) {
             }
         });
+        
         jam();
 
         tampilkan_ppnobat_ralan = Sequel.cariIsi("select set_nota.tampilkan_ppnobat_ralan from set_nota");
@@ -683,6 +687,11 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
 
         TNoRw.setHighlighter(null);
         TNoRw.setName("TNoRw"); // NOI18N
+        TNoRw.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                TNoRwActionPerformed(evt);
+            }
+        });
         TNoRw.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 TNoRwKeyPressed(evt);
@@ -699,11 +708,6 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
 
         KdDokter.setHighlighter(null);
         KdDokter.setName("KdDokter"); // NOI18N
-        KdDokter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                KdDokterKeyPressed(evt);
-            }
-        });
         FormInput.add(KdDokter);
         KdDokter.setBounds(75, 72, 120, 23);
 
@@ -727,16 +731,6 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
         btnDokter.setMnemonic('3');
         btnDokter.setToolTipText("Alt+3");
         btnDokter.setName("btnDokter"); // NOI18N
-        btnDokter.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDokterActionPerformed(evt);
-            }
-        });
-        btnDokter.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                btnDokterKeyPressed(evt);
-            }
-        });
         FormInput.add(btnDokter);
         btnDokter.setBounds(428, 72, 28, 23);
 
@@ -747,11 +741,6 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
 
         NoResep.setHighlighter(null);
         NoResep.setName("NoResep"); // NOI18N
-        NoResep.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                NoResepKeyPressed(evt);
-            }
-        });
         FormInput.add(NoResep);
         NoResep.setBounds(528, 72, 130, 23);
 
@@ -761,51 +750,26 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
         jLabel8.setBounds(0, 42, 72, 23);
 
         DTPBeri.setForeground(new java.awt.Color(50, 70, 50));
-        DTPBeri.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "16-08-2023" }));
+        DTPBeri.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "18-08-2023" }));
         DTPBeri.setDisplayFormat("dd-MM-yyyy");
         DTPBeri.setName("DTPBeri"); // NOI18N
         DTPBeri.setOpaque(false);
         DTPBeri.setPreferredSize(new java.awt.Dimension(100, 23));
-        DTPBeri.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                DTPBeriItemStateChanged(evt);
-            }
-        });
-        DTPBeri.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                DTPBeriKeyPressed(evt);
-            }
-        });
         FormInput.add(DTPBeri);
         DTPBeri.setBounds(75, 42, 90, 23);
 
         cmbJam.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
         cmbJam.setName("cmbJam"); // NOI18N
-        cmbJam.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                cmbJamKeyPressed(evt);
-            }
-        });
         FormInput.add(cmbJam);
         cmbJam.setBounds(168, 42, 62, 23);
 
         cmbMnt.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59" }));
         cmbMnt.setName("cmbMnt"); // NOI18N
-        cmbMnt.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                cmbMntKeyPressed(evt);
-            }
-        });
         FormInput.add(cmbMnt);
         cmbMnt.setBounds(233, 42, 62, 23);
 
         cmbDtk.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59" }));
         cmbDtk.setName("cmbDtk"); // NOI18N
-        cmbDtk.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                cmbDtkKeyPressed(evt);
-            }
-        });
         FormInput.add(cmbDtk);
         cmbDtk.setBounds(298, 42, 62, 23);
 
@@ -818,6 +782,11 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
         ChkRM.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 ChkRMItemStateChanged(evt);
+            }
+        });
+        ChkRM.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ChkRMActionPerformed(evt);
             }
         });
         FormInput.add(ChkRM);
@@ -963,14 +932,21 @@ public final class DlgPeresepanDokter extends javax.swing.JDialog {
 
 
     private void TCariKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TCariKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            BtnCariActionPerformed(null);
-        } else if (evt.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
-            BtnCari.requestFocus();
-        } else if (evt.getKeyCode() == KeyEvent.VK_PAGE_UP) {
-            BtnKeluar.requestFocus();
-        } else if (evt.getKeyCode() == KeyEvent.VK_UP) {
-            tbResep.requestFocus();
+        switch (evt.getKeyCode()) {
+            case KeyEvent.VK_ENTER:
+                BtnCariActionPerformed(null);
+                break;
+            case KeyEvent.VK_PAGE_DOWN:
+                BtnCari.requestFocus();
+                break;
+            case KeyEvent.VK_PAGE_UP:
+                BtnKeluar.requestFocus();
+                break;
+            case KeyEvent.VK_UP:
+                tbResep.requestFocus();
+                break;
+            default:
+                break;
         }
 }//GEN-LAST:event_TCariKeyPressed
 
@@ -1320,47 +1296,6 @@ private void ppBersihkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         }
     }//GEN-LAST:event_TNoRwKeyPressed
 
-    private void KdDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_KdDokterKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_PAGE_DOWN) {
-            NmDokter.setText(dokter.tampil3(KdDokter.getText()));
-        } else if (evt.getKeyCode() == KeyEvent.VK_UP) {
-            btnDokterActionPerformed(null);
-        } else {
-            Valid.pindah(evt, NoResep, BtnSimpan);
-        }
-    }//GEN-LAST:event_KdDokterKeyPressed
-
-    private void btnDokterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDokterActionPerformed
-        dokter.setSize(internalFrame1.getWidth() - 20, internalFrame1.getHeight() - 20);
-        dokter.isCek();
-        dokter.setLocationRelativeTo(internalFrame1);
-        dokter.setVisible(true);
-    }//GEN-LAST:event_btnDokterActionPerformed
-
-    private void btnDokterKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btnDokterKeyPressed
-        Valid.pindah(evt, KdDokter, BtnSimpan);
-    }//GEN-LAST:event_btnDokterKeyPressed
-
-    private void NoResepKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_NoResepKeyPressed
-        Valid.pindah(evt, cmbDtk, KdDokter);
-    }//GEN-LAST:event_NoResepKeyPressed
-
-    private void DTPBeriKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_DTPBeriKeyPressed
-        Valid.pindah(evt, TNoRw, cmbJam);
-    }//GEN-LAST:event_DTPBeriKeyPressed
-
-    private void cmbJamKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cmbJamKeyPressed
-        Valid.pindah(evt, DTPBeri, cmbMnt);
-    }//GEN-LAST:event_cmbJamKeyPressed
-
-    private void cmbMntKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cmbMntKeyPressed
-        Valid.pindah(evt, cmbJam, cmbDtk);
-    }//GEN-LAST:event_cmbMntKeyPressed
-
-    private void cmbDtkKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cmbDtkKeyPressed
-        Valid.pindah(evt, cmbMnt, NoResep);
-    }//GEN-LAST:event_cmbDtkKeyPressed
-
     private void ChkRMItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_ChkRMItemStateChanged
         if (ChkRM.isSelected() == true) {
             NoResep.setEditable(false);
@@ -1537,24 +1472,24 @@ private void ppBersihkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         this.setCursor(Cursor.getDefaultCursor());
     }//GEN-LAST:event_ppStok1ActionPerformed
 
-    private void DTPBeriItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_DTPBeriItemStateChanged
-        try {
-            emptTeksobat();
-        } catch (Exception e) {
-        }
-
-    }//GEN-LAST:event_DTPBeriItemStateChanged
-
     private void Scroll1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_Scroll1KeyPressed
         // TODO add your handling code here:
     }//GEN-LAST:event_Scroll1KeyPressed
+
+    private void TNoRwActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TNoRwActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_TNoRwActionPerformed
+
+    private void ChkRMActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ChkRMActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ChkRMActionPerformed
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(() -> {
-            DlgPeresepanDokter dialog = new DlgPeresepanDokter(new javax.swing.JFrame(), true);
+            DlgPeresepanDokterNew dialog = new DlgPeresepanDokterNew(new javax.swing.JFrame(), true);
             dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                 @Override
                 public void windowClosing(java.awt.event.WindowEvent e) {
@@ -1974,48 +1909,24 @@ private void ppBersihkanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                String nol_jam = "";
-                String nol_menit = "";
-                String nol_detik = "";
                 // Membuat Date
                 //Date dt = new Date();
-                Date now = Calendar.getInstance().getTime();
+                Calendar now = Calendar.getInstance();
 
                 // Mengambil nilaj JAM, MENIT, dan DETIK Sekarang
                 if (ChkJln.isSelected() == true) {
-                    nilai_jam = now.getHours();
-                    nilai_menit = now.getMinutes();
-                    nilai_detik = now.getSeconds();
+                    nilai_jam = now.get(Calendar.HOUR);
+                    nilai_menit = now.get(Calendar.MINUTE);
+                    nilai_detik = now.get(Calendar.SECOND);
                 } else if (ChkJln.isSelected() == false) {
                     nilai_jam = cmbJam.getSelectedIndex();
                     nilai_menit = cmbMnt.getSelectedIndex();
                     nilai_detik = cmbDtk.getSelectedIndex();
                 }
-
-                // Jika nilai JAM lebih kecil dari 10 (hanya 1 digit)
-                if (nilai_jam <= 9) {
-                    // Tambahkan "0" didepannya
-                    nol_jam = "0";
-                }
-                // Jika nilai MENIT lebih kecil dari 10 (hanya 1 digit)
-                if (nilai_menit <= 9) {
-                    // Tambahkan "0" didepannya
-                    nol_menit = "0";
-                }
-                // Jika nilai DETIK lebih kecil dari 10 (hanya 1 digit)
-                if (nilai_detik <= 9) {
-                    // Tambahkan "0" didepannya
-                    nol_detik = "0";
-                }
-                // Membuat String JAM, MENIT, DETIK
-                String jam = nol_jam + Integer.toString(nilai_jam);
-                String menit = nol_menit + Integer.toString(nilai_menit);
-                String detik = nol_detik + Integer.toString(nilai_detik);
-                // Menampilkan pada Layar
-                //tampil_jam.setText("  " + jam + " : " + menit + " : " + detik + "  ");
-                cmbJam.setSelectedItem(jam);
-                cmbMnt.setSelectedItem(menit);
-                cmbDtk.setSelectedItem(detik);
+                cmbJam.setSelectedItem(HUtil.padLeft(Integer.toString(nilai_jam), 2, '0'));
+                cmbMnt.setSelectedItem(HUtil.padLeft(Integer.toString(nilai_menit), 2, '0'));
+                cmbDtk.setSelectedItem(HUtil.padLeft(Integer.toString(nilai_detik), 2, '0'));
+                
             }
         };
         // Timer
